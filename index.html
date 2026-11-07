@@ -136,9 +136,8 @@ svg.ic { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: ro
 .row-wrap { display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; }
 .f-half { flex: 1 1 440px; }
 .f-full { flex: 1 1 100%; }
-.f-tree { flex: 1 1 260px; }
 .f-docs { flex: 999 1 560px; }
-.f-remarks { flex: 1 1 240px; }
+.f-remarks { flex: 1 1 240px; min-height: 231px; }
 .map-thumb { position: relative; display: block; width: 100%; flex: 1 1 auto; min-height: 112px; padding: 0; border: 0; background: #EEF2EA; overflow: hidden; }
 .map-thumb:hover .map-chip { background: #B2EBF2; }
 .map-thumb svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; }
@@ -148,20 +147,13 @@ svg.ic { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: ro
 .panel-head h2.b { font-weight: 700; }
 .round { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 50%; padding: 0; flex: none; }
 .round.add { background: #43A047; color: #FFFFFF; }
-.round.opt { background: #B2EBF2; color: #37474F; }
 .round.del { background: #D32F2F; color: #FFFFFF; }
 .round.del:hover { background: #B71C1C; }
 .round.del:disabled { background: #ECEFF1; color: #78909C; cursor: not-allowed; }
-.tree-wrap { padding: 10px 12px 12px; flex: 1 1 auto; }
-.tree-root { display: flex; align-items: center; gap: 2px; }
-.tree-toggle { width: 24px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 0; background: transparent; color: #616161; padding: 0; }
-.tree { list-style: none; margin: 2px 0 0 19px; padding: 0; border-left: 1px solid #B0BEC5; }
-.tree li { position: relative; padding: 2px 0 2px 16px; }
-.tree li::before { content: ""; position: absolute; left: 0; top: 50%; width: 14px; border-top: 1px solid #B0BEC5; }
-.tree li:last-child::after { content: ""; position: absolute; left: -1px; top: 50%; bottom: 0; width: 1px; background: #FFFFFF; }
-.tree-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 28px; border: 0; border-radius: 2px; background: transparent; color: #424242; font-size: 15px; padding: 2px 8px 2px 4px; }
-.tree-btn:hover { background: #F1FBFC; }
-.tree-btn.on { background: #E0F7FA; color: #37474F; }
+.doc-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 12px; border-bottom: 1px solid #CFD8DC; color: #607D8B; }
+.filter-pill { border: 1px solid #CFD8DC; border-radius: 14px; background: #FFFFFF; color: #424242; font-size: 13px; line-height: 18px; padding: 3px 12px; }
+.filter-pill:hover { background: #F1FBFC; }
+.filter-pill.on, .filter-pill.on:hover { background: #B2EBF2; border-color: #B2EBF2; color: #37474F; font-weight: 500; }
 .doc-table { min-width: 560px; }
 .doc-row { display: grid; grid-template-columns: 72px minmax(0, 1.3fr) minmax(0, 1.2fr) minmax(0, 1.3fr) 60px 60px 84px; gap: 1px; background: #E0E6E9; border-bottom: 1px solid #E0E6E9; }
 .doc-row > div { background: #FFFFFF; padding: 8px 10px; display: flex; align-items: center; gap: 6px; font-size: 14px; color: #212121; min-width: 0; }
@@ -360,24 +352,15 @@ svg.ic { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: ro
         </div>
 
         <div class="row-wrap">
-          <section class="box f-tree">
-            <div class="panel-head">
-              <h2>Revenue Documents</h2>
-              <span class="spacer"></span>
-              <button class="round opt" aria-label="Folder options"><svg width="4" height="16" viewBox="0 0 4 16" aria-hidden="true"><circle cx="2" cy="2" r="1.6" fill="#37474F"/><circle cx="2" cy="8" r="1.6" fill="#37474F"/><circle cx="2" cy="14" r="1.6" fill="#37474F"/></svg></button>
-            </div>
-            <div class="tree-wrap" id="tree"></div>
-          </section>
-
           <section class="box f-docs">
             <div class="panel-head">
               <h2 class="b">Revenue Purchase Docs</h2>
-              <span class="muted" id="doc-path"></span>
               <span class="spacer"></span>
               <span class="muted" id="doc-selected"></span>
               <button class="round del" id="doc-delete" aria-label="Delete selected rows" title="Delete selected rows" disabled><svg class="ic" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9.5h6.6L12 4M6.8 6.8v4M9.2 6.8v4"/></svg></button>
               <button class="round add" id="doc-add" aria-label="Add row" title="Add row"><svg class="ic" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12"/></svg></button>
             </div>
+            <div class="doc-filters" id="doc-filters" role="group" aria-label="Filter documents by folder"></div>
             <div class="h-scroll">
               <div class="doc-table" role="table" aria-label="Revenue purchase documents">
                 <div class="doc-row doc-head" role="row">
@@ -780,7 +763,6 @@ svg.ic { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: ro
 
   /* ---------- Record: documents ---------- */
   var FOLDERS = ['Forms', 'Content', 'Additional', 'Sale'];
-  var FOLDER_ICON = '<svg class="ic" width="20" height="18" viewBox="0 0 20 18" aria-hidden="true"><path d="M2 15V3h5l2 2h7v3M2 15l3-7h13l-3 7z"/></svg>';
   var SCAN_URL = 'data:image/svg+xml,' + encodeURIComponent($('scan-svg').textContent);
   $('drawer-img').src = SCAN_URL;
   var THUMB = function (title) {
@@ -804,8 +786,7 @@ svg.ic { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: ro
   $('doc-drawer').addEventListener('click', function (e) {
     if (e.target.closest('[data-close-doc]')) closeDrawer();
   });
-  var folder = 'Additional';
-  var rootOpen = true;
+  var folder = '';
   var nextDocId = 2;
   var docs = [
     { id: 1, folder: 'Additional', title: 'Jamabandi', type: 'Sale Sheet', detail: 'sale deed', sheet: '5', page: '9', hasFile: true, selected: false }
@@ -813,18 +794,14 @@ svg.ic { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: ro
 
   var inFolder = function (d) { return folder === '' || d.folder === folder; };
 
-  function renderTree() {
-    var html = '<div class="tree-root">' +
-      '<button class="tree-toggle" data-toggle aria-expanded="' + rootOpen + '" aria-label="' + (rootOpen ? 'Collapse folders' : 'Expand folders') + '">' +
-      '<svg class="ic" width="12" height="12" viewBox="0 0 16 16" aria-hidden="true"><path d="' + (rootOpen ? 'M3 8h10' : 'M3 8h10M8 3v10') + '"/></svg></button>' +
-      '<button class="tree-btn' + (folder === '' ? ' on' : '') + '" data-folder="">' + FOLDER_ICON + '<span>/</span></button></div>';
-    if (rootOpen) {
-      html += '<ul class="tree">' + FOLDERS.map(function (name) {
-        return '<li><button class="tree-btn' + (name === folder ? ' on' : '') + '" data-folder="' + name + '"' +
-          (name === folder ? ' aria-current="true"' : '') + '>' + FOLDER_ICON + '<span>' + name + '</span></button></li>';
-      }).join('') + '</ul>';
-    }
-    $('tree').innerHTML = html;
+  function renderFilters() {
+    var pill = function (value, label) {
+      var on = value === folder;
+      return '<button class="filter-pill' + (on ? ' on' : '') + '" data-folder="' + value + '" aria-pressed="' + on + '">' + label + '</button>';
+    };
+    $('doc-filters').innerHTML = pill('', 'All') +
+      '<svg class="ic" width="12" height="12" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>' +
+      FOLDERS.map(function (name) { return pill(name, name); }).join('');
   }
 
   function renderDocBar() {
@@ -837,8 +814,6 @@ svg.ic { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: ro
 
   function renderDocs() {
     var shown = docs.filter(inFolder);
-    var path = '/' + folder;
-    $('doc-path').textContent = path;
     $('doc-rows').innerHTML = shown.length ? shown.map(function (d, i) {
       return '<div class="doc-row" role="row" data-doc="' + d.id + '">' +
         '<div role="cell"><input type="checkbox" class="cb" data-select aria-label="Select row ' + (i + 1) + '"' + (d.selected ? ' checked' : '') + '><span class="doc-no">' + (i + 1) + '</span></div>' +
@@ -850,7 +825,7 @@ svg.ic { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: ro
         '<div role="cell">' + (d.hasFile ? THUMB(d.title) :
           '<button class="add-tile" data-upload aria-label="Upload document"><svg class="ic" width="22" height="22" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12"/></svg></button>') +
         '</div></div>';
-    }).join('') : '<div class="doc-empty">No documents in ' + esc(path) + '</div>';
+    }).join('') : '<div class="doc-empty">' + (folder ? 'No documents in ' + esc(folder) : 'No documents') + '</div>';
     renderDocBar();
   }
 
@@ -860,17 +835,14 @@ svg.ic { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: ro
     return docs.filter(function (d) { return d.id === id; })[0];
   };
 
-  $('tree').addEventListener('click', function (e) {
-    if (e.target.closest('[data-toggle]')) {
-      rootOpen = !rootOpen;
-      renderTree();
-      return;
-    }
+  $('doc-filters').addEventListener('click', function (e) {
     var btn = e.target.closest('[data-folder]');
     if (!btn) return;
     folder = btn.getAttribute('data-folder');
-    renderTree();
+    renderFilters();
     renderDocs();
+    var active = $('doc-filters').querySelector('[data-folder="' + folder + '"]');
+    if (active) active.focus();
   });
   $('doc-rows').addEventListener('input', function (e) {
     var key = e.target.getAttribute('data-key');
@@ -921,7 +893,7 @@ svg.ic { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: ro
 
   renderList();
   renderStatus();
-  renderTree();
+  renderFilters();
   renderDocs();
   route();
 })();
