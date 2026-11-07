@@ -1,0 +1,930 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>RDM Revenue In Forms Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Ubuntu+Mono:wght@400;700&display=swap">
+<style>
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: #F5F6F7; color: #212121; font-family: Ubuntu, 'Segoe UI', sans-serif; }
+a { color: #00729A; }
+a:hover { color: #005A7A; }
+button { font-family: inherit; cursor: pointer; }
+h1, h2, p { margin: 0; }
+svg.ic { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+:focus-visible { outline: 2px solid #00ACC1; outline-offset: -2px; }
+
+/* Shell */
+.app { min-height: 100vh; display: flex; flex-direction: column; }
+.topbar { background: #607D8B; border-top: 3px solid #37474F; color: #FFFFFF; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 20px; padding: 4px 8px 4px 4px; min-height: 40px; }
+.topbar button { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 0; background: transparent; color: #FFFFFF; padding: 0; }
+.topbar .logo { font-size: 28px; font-weight: 300; line-height: 32px; }
+.topbar .txt { font-size: 14px; }
+.spacer { flex: 1 1 auto; }
+.layout { display: flex; flex-wrap: wrap; flex: 1 1 auto; align-items: stretch; }
+.sidenav { flex: 1 1 260px; max-width: 100%; background: #FFFFFF; border-right: 1px solid #CFD8DC; }
+.nav-search { display: flex; align-items: center; gap: 8px; padding: 8px; }
+.nav-search label { flex: 1 1 auto; display: flex; align-items: center; gap: 8px; border: 1px solid #CFD8DC; border-radius: 8px; padding: 4px 10px; color: #616161; min-width: 0; }
+.nav-search input { border: 0; outline: none; background: transparent; font-family: inherit; font-style: italic; font-size: 14px; width: 100%; min-width: 0; color: #212121; }
+.pin { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 3px; background: #B2EBF2; color: #37474F; padding: 0; flex: none; }
+.nav-item { display: block; width: 100%; text-align: left; border: 0; background: transparent; color: #424242; font-size: 14px; padding: 10px 12px 10px 24px; text-decoration: none; line-height: normal; }
+.nav-item:hover { background: #F1FBFC; color: #424242; }
+.nav-item.on, .nav-item.on:hover { background: #B2EBF2; color: #37474F; }
+.nav-group { display: block; width: 100%; text-align: left; border: 0; border-top: 1px solid #E0E6E9; background: #FFFFFF; color: #424242; font-size: 14px; padding: 12px; }
+.nav-group:hover { background: #F1FBFC; }
+.view { flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; }
+
+/* Shared blocks */
+.box { background: #FFFFFF; border: 1px solid #CFD8DC; border-radius: 3px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.sec { background: #FFFFFF; display: flex; flex-direction: column; min-width: 0; }
+.sec-h { background: #E8F7FA; color: #455A64; font-size: 13px; line-height: 18px; padding: 5px 10px; border-bottom: 1px solid #CFD8DC; }
+.grid { display: grid; gap: 1px; background: #E0E6E9; flex: 1 1 auto; }
+.g1 { grid-template-columns: minmax(0, 1fr); }
+.g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.g5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.g6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.s2 { grid-column: span 2; }
+.s3 { grid-column: span 3; }
+.cell { background: #FFFFFF; padding: 6px 10px 5px; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.cell:focus-within { box-shadow: inset 0 -2px 0 #1E88E5; }
+.lbl { font-size: 12px; line-height: 16px; color: #616161; display: flex; align-items: center; gap: 3px; white-space: nowrap; overflow: hidden; }
+.req { color: #D32F2F; font-size: 13px; line-height: 12px; align-self: flex-start; }
+.val-row { display: flex; align-items: center; gap: 6px; color: #546E7A; }
+.inp { flex: 1 1 auto; width: 100%; min-width: 0; border: 0; padding: 0; margin: 0; background: transparent; font-family: inherit; font-size: 14px; line-height: 20px; color: #212121; outline: none; text-overflow: ellipsis; }
+.inp:focus-visible { outline: none; }
+.inp.num { text-align: right; }
+.strong .inp { font-size: 15px; font-weight: 500; }
+.bold .inp { font-weight: 700; }
+.check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #424242; min-height: 36px; }
+.check input, .cb { width: 18px; height: 18px; margin: 0; accent-color: #546E7A; flex: none; }
+.icon-btn { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 50%; background: transparent; color: #607D8B; padding: 0; }
+.icon-btn:hover { background: #ECEFF1; }
+.pill { background: #616161; color: #FFFFFF; border-radius: 12px; padding: 1px 8px; font-size: 12px; line-height: 16px; }
+.pill.approved { background: #2E7D32; }
+.pill.lg { margin-left: 4px; border-radius: 16px; padding: 6px 12px; font-size: 15px; line-height: 18px; }
+
+/* List screen */
+.list-body { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+.search-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px; }
+.search-field { flex: 999 1 320px; min-width: 0; display: flex; align-items: center; gap: 10px; border: 1px solid #B0BEC5; border-radius: 3px; padding: 0 12px; height: 40px; color: #607D8B; background: #FFFFFF; }
+.search-field:focus-within { border-color: #00ACC1; }
+.search-input { flex: 1 1 auto; min-width: 0; border: 0; outline: none; background: transparent; font-family: inherit; font-size: 15px; color: #212121; }
+.search-input:focus-visible { outline: none; }
+.search-input::placeholder { color: #9E9E9E; font-size: 13px; }
+.search-btn { display: inline-flex; align-items: center; justify-content: center; height: 40px; border: 0; border-radius: 3px; background: #B2EBF2; color: #37474F; font-size: 15px; padding: 0 24px; }
+.search-btn:hover { background: #80DEEA; }
+.adv-btn { display: inline-flex; align-items: center; gap: 6px; height: 40px; border: 0; border-radius: 3px; background: transparent; color: #00729A; font-size: 14px; padding: 0 8px; white-space: nowrap; }
+.adv-btn:hover { background: #F1FBFC; }
+.chev.open { transform: rotate(180deg); }
+.adv-panel { border-top: 1px solid #CFD8DC; }
+.adv-foot { display: flex; justify-content: flex-end; padding: 6px 10px; border-top: 1px solid #E0E6E9; }
+.clear-btn { border: 0; background: transparent; color: #00729A; font-size: 13px; padding: 0; }
+.clear-btn:hover { text-decoration: underline; }
+.sug-scroll { max-height: 240px; overflow-y: auto; border-top: 1px solid #CFD8DC; }
+.sug-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: #E0E6E9; border-bottom: 1px solid #E0E6E9; }
+.sug-row > div { position: relative; background: #FFFFFF; padding: 8px 12px; font-size: 14px; color: #212121; min-width: 0; min-height: 36px; }
+.sug-head > div { background: #FAFBFB; font-size: 13px; font-weight: 700; color: #37474F; padding: 6px 12px; min-height: 0; }
+.sug-body > div:has(.sug-link):hover { background: #F1FBFC; }
+.sug-link { border: 0; padding: 0; background: transparent; color: #212121; font-family: inherit; font-size: 14px; text-align: left; text-decoration: none; outline: none; }
+.sug-link:hover { color: #212121; text-decoration: underline; }
+.sug-link::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; }
+.sug-link:focus-visible::after { outline: 2px solid #00ACC1; outline-offset: -2px; }
+.list-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding: 10px 12px; border-bottom: 1px solid #CFD8DC; }
+.list-head h1 { font-size: 15px; font-weight: 700; color: #212121; }
+.muted { font-size: 13px; color: #546E7A; }
+.h-scroll { overflow-x: auto; }
+.rec-table { min-width: 720px; }
+.rec-row { position: relative; display: grid; grid-template-columns: 84px minmax(0, 2.6fr) minmax(0, 1fr) minmax(0, 1fr) 140px 150px; gap: 1px; background: #E0E6E9; border-bottom: 1px solid #E0E6E9; }
+.rec-row > div { background: #FFFFFF; padding: 11px 12px; display: flex; align-items: center; font-size: 14px; color: #212121; min-width: 0; }
+.rec-head > div { background: #FAFBFB; font-size: 13px; font-weight: 700; color: #37474F; padding: 9px 12px; }
+.rec-body:hover > div, .rec-body:focus-within > div { background: #F1FBFC; }
+.rec-id { font-family: 'Ubuntu Mono', monospace; font-size: 15px !important; }
+.rec-link { color: #212121; font-size: 15px; font-weight: 500; text-decoration: none; outline: none; }
+.rec-link:hover { color: #212121; text-decoration: underline; }
+.rec-link::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; }
+.rec-link:focus-visible::after { outline: 2px solid #00ACC1; outline-offset: -2px; }
+.empty { padding: 28px 12px; font-size: 14px; color: #616161; text-align: center; }
+
+/* Record screen */
+.record-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 8px 12px; background: #FAFBFB; border-bottom: 1px solid #E0E6E9; }
+.record-id { display: flex; align-items: center; gap: 8px; color: #757575; font-size: 14px; }
+.record-id b { font-family: 'Ubuntu Mono', monospace; font-size: 18px; font-weight: 400; color: #212121; }
+.pager { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; gap: 4px; color: #757575; font-size: 13px; }
+.record-actions { display: flex; align-items: center; gap: 8px; }
+.approve-btn { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 3px; background: #2E7D32; color: #FFFFFF; font-size: 15px; padding: 7px 16px; }
+.approve-btn:hover { background: #1B5E20; }
+.cancel-btn { border: 1px solid #B0BEC5; border-radius: 3px; background: #FFFFFF; color: #37474F; font-size: 15px; padding: 6px 16px; }
+.cancel-btn:hover { background: #ECEFF1; }
+.save-wrap { display: flex; }
+.save-btn { border: 0; background: #B2EBF2; color: #455A64; font-size: 15px; padding: 7px 24px; border-radius: 3px 0 0 3px; }
+.save-more { border: 0; border-left: 1px solid #FFFFFF; background: #B2EBF2; width: 22px; padding: 0; border-radius: 0 3px 3px 0; }
+.back-link { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: #607D8B; color: #FFFFFF; text-decoration: none; }
+.back-link:hover { color: #FFFFFF; background: #546E7A; }
+.record-body { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+.strip { display: flex; flex-wrap: wrap; gap: 1px; background: #CFD8DC; border: 1px solid #CFD8DC; border-radius: 3px; overflow: hidden; }
+.f-location { flex: 999 1 500px; }
+.f-center { flex: 1 1 140px; }
+.f-size { flex: 1 1 200px; }
+.f-map { flex: 0 1 216px; min-width: 180px; }
+.row-wrap { display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; }
+.f-half { flex: 1 1 440px; }
+.f-full { flex: 1 1 100%; }
+.f-tree { flex: 1 1 260px; }
+.f-docs { flex: 999 1 560px; }
+.f-remarks { flex: 1 1 240px; }
+.map-thumb { position: relative; display: block; width: 100%; flex: 1 1 auto; min-height: 112px; padding: 0; border: 0; background: #EEF2EA; overflow: hidden; }
+.map-thumb:hover .map-chip { background: #B2EBF2; }
+.map-thumb svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; }
+.map-chip { position: absolute; right: 6px; bottom: 6px; background: #FFFFFF; color: #37474F; border: 1px solid #CFD8DC; border-radius: 3px; font-size: 11px; line-height: 14px; padding: 2px 6px; }
+.panel-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px 8px 12px; border-bottom: 1px solid #CFD8DC; min-height: 49px; }
+.panel-head h2 { font-size: 15px; font-weight: 500; color: #212121; }
+.panel-head h2.b { font-weight: 700; }
+.round { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 50%; padding: 0; flex: none; }
+.round.add { background: #43A047; color: #FFFFFF; }
+.round.opt { background: #B2EBF2; color: #37474F; }
+.round.del { background: #D32F2F; color: #FFFFFF; }
+.round.del:hover { background: #B71C1C; }
+.round.del:disabled { background: #ECEFF1; color: #78909C; cursor: not-allowed; }
+.tree-wrap { padding: 10px 12px 12px; flex: 1 1 auto; }
+.tree-root { display: flex; align-items: center; gap: 2px; }
+.tree-toggle { width: 24px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 0; background: transparent; color: #616161; padding: 0; }
+.tree { list-style: none; margin: 2px 0 0 19px; padding: 0; border-left: 1px solid #B0BEC5; }
+.tree li { position: relative; padding: 2px 0 2px 16px; }
+.tree li::before { content: ""; position: absolute; left: 0; top: 50%; width: 14px; border-top: 1px solid #B0BEC5; }
+.tree li:last-child::after { content: ""; position: absolute; left: -1px; top: 50%; bottom: 0; width: 1px; background: #FFFFFF; }
+.tree-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 28px; border: 0; border-radius: 2px; background: transparent; color: #424242; font-size: 15px; padding: 2px 8px 2px 4px; }
+.tree-btn:hover { background: #F1FBFC; }
+.tree-btn.on { background: #E0F7FA; color: #37474F; }
+.doc-table { min-width: 560px; }
+.doc-row { display: grid; grid-template-columns: 72px minmax(0, 1.3fr) minmax(0, 1.2fr) minmax(0, 1.3fr) 60px 60px 84px; gap: 1px; background: #E0E6E9; border-bottom: 1px solid #E0E6E9; }
+.doc-row > div { background: #FFFFFF; padding: 8px 10px; display: flex; align-items: center; gap: 6px; font-size: 14px; color: #212121; min-width: 0; }
+.doc-row > div:has(.inp:focus) { box-shadow: inset 0 -2px 0 #1E88E5; }
+.doc-head > div { background: #FAFBFB; font-size: 13px; font-weight: 700; color: #37474F; }
+.doc-row .n { justify-content: flex-end; text-align: right; }
+.doc-row:not(.doc-head):hover > div { background: #F7FCFD; }
+.doc-no { font-size: 12px; color: #616161; }
+.filter-btn { width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border: 0; background: transparent; color: #039BE5; padding: 0; }
+.add-tile { width: 48px; height: 60px; display: flex; align-items: center; justify-content: center; border: 1px dashed #90A4AE; border-radius: 3px; background: #FFFFFF; color: #039BE5; padding: 0; }
+.add-tile:hover { background: #F1FBFC; }
+.thumb { width: 48px; height: 62px; display: block; object-fit: cover; }
+.thumb-btn { display: block; border: 1px solid #B0BEC5; padding: 0; background: #FFFFFF; line-height: 0; }
+.thumb-btn:hover { border-color: #1E88E5; box-shadow: 0 1px 4px rgba(38, 50, 56, 0.35); }
+.doc-empty { padding: 20px 12px; font-size: 14px; color: #616161; text-align: center; border-bottom: 1px solid #E0E6E9; }
+.remarks { display: block; width: 100%; flex: 1 1 auto; min-height: 120px; border: 0; resize: none; padding: 10px 12px; background: #FFFFFF; font-family: inherit; font-size: 14px; line-height: 20px; color: #212121; outline: none; }
+.remarks:focus { box-shadow: inset 0 -2px 0 #1E88E5; }
+.remarks:focus-visible { outline: none; }
+
+/* Scanned document drawer */
+.drawer-wrap { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 40; visibility: hidden; transition: visibility 0s linear 0.28s; }
+.drawer-wrap.open { visibility: visible; transition-delay: 0s; }
+.drawer-bg { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; border: 0; padding: 0; background: rgba(38, 50, 56, 0.55); opacity: 0; transition: opacity 0.28s ease; cursor: default; }
+.drawer-wrap.open .drawer-bg { opacity: 1; }
+.drawer { position: absolute; top: 0; right: 0; bottom: 0; width: 100%; max-width: 720px; display: flex; flex-direction: column; background: #FFFFFF; box-shadow: -4px 0 16px rgba(38, 50, 56, 0.3); transform: translateX(100%); transition: transform 0.28s ease; }
+.drawer-wrap.open .drawer { transform: translateX(0); }
+.drawer-head { display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 12px; background: #E8F7FA; border-bottom: 1px solid #CFD8DC; }
+.drawer-title { flex: 1 1 auto; min-width: 0; }
+.drawer-title b { display: block; font-size: 15px; font-weight: 500; color: #212121; }
+.drawer-title span { display: block; font-size: 12px; color: #546E7A; }
+.drawer-body { flex: 1 1 auto; min-height: 0; overflow: auto; background: #455A64; padding: 16px; }
+.drawer-body img { display: block; width: 100%; height: auto; }
+@media (prefers-reduced-motion: reduce) { .drawer, .drawer-bg, .drawer-wrap { transition: none; } }
+
+/* Modals */
+.modal { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.backdrop { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; border: 0; padding: 0; background: rgba(38, 50, 56, 0.55); cursor: default; }
+.dialog { position: relative; width: 100%; max-height: 100%; background: #FFFFFF; border: 1px solid #CFD8DC; border-radius: 3px; overflow: hidden; display: flex; flex-direction: column; }
+.map-dialog { max-width: 960px; }
+.confirm-dialog { max-width: 440px; }
+.map-head { display: flex; align-items: center; gap: 8px; padding: 4px 6px 4px 12px; background: #E8F7FA; border-bottom: 1px solid #CFD8DC; }
+.map-head span { font-size: 14px; color: #37474F; flex: 1 1 auto; min-width: 0; }
+.map-head a { font-size: 13px; white-space: nowrap; }
+.map-frame { display: block; width: 100%; height: 520px; max-height: 70vh; border: 0; background: #EEF2EA; }
+.confirm-text { padding: 16px 12px; font-size: 14px; line-height: 20px; color: #212121; }
+.confirm-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 10px 12px; border-top: 1px solid #E0E6E9; }
+
+@media (max-width: 760px) {
+  .g3, .g4, .g5, .g6 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .g5 .cell:last-child, .s3 { grid-column: span 2; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <button aria-label="Menu"><svg class="ic" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12"/></svg></button>
+    <span class="logo">RDM</span>
+    <span class="txt" id="top-title">Revenue In Forms</span>
+    <span class="spacer"></span>
+    <span class="txt">Laxmi Kant [RDM_ADM]</span>
+    <button aria-label="Applications"><svg class="ic" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="1"/><path d="M2 6.5h12M2 10h12M6 3v10M10 3v10"/></svg></button>
+    <button aria-label="Full screen"><svg class="ic" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 2v4H2M10 2v4h4M6 14v-4H2M10 14v-4h4"/></svg></button>
+  </header>
+
+  <div class="layout">
+    <nav class="sidenav" aria-label="Module menu">
+      <div class="nav-search">
+        <label>
+          <svg class="ic" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+          <input aria-label="Search menu" placeholder="Search (F1)..">
+        </label>
+        <button class="pin" aria-label="Pin menu"><svg class="ic" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 2h6M6 2v5l-2 3h8l-2-3V2M8 10v4"/></svg></button>
+      </div>
+      <button class="nav-group" style="font-weight:500;color:#455A64">In Forms</button>
+      <a class="nav-item on" href="#/">Revenue In Forms</a>
+      <button class="nav-item">Revenue In Form History</button>
+      <button class="nav-item">Revenue In Form Status History</button>
+      <button class="nav-group">Out Forms</button>
+      <button class="nav-group">Entities</button>
+      <button class="nav-group" style="border-bottom:1px solid #E0E6E9">Configurations</button>
+    </nav>
+
+    <!-- LAND RECORDS -->
+    <main class="view" id="list-view">
+      <div class="list-body">
+        <section class="box" aria-label="Search land records">
+          <div class="search-row">
+            <label class="search-field">
+              <svg class="ic" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+              <input class="search-input" id="q" autocomplete="off" aria-label="Search by Satsang Place, City or ID No." placeholder="Search by Satsang Place, City or ID No.">
+            </label>
+            <button class="search-btn" id="search-btn">Search</button>
+            <button class="adv-btn" id="adv-btn" aria-expanded="false" aria-controls="adv-panel">
+              <span id="adv-label">Advanced search</span>
+              <svg class="ic chev" id="adv-chev" width="12" height="12" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5"/></svg>
+            </button>
+          </div>
+          <div class="adv-panel" id="adv-panel" hidden>
+            <div class="grid g4">
+              <div class="cell"><label class="lbl" for="f-person">Authorized Person</label><input id="f-person" class="inp" autocomplete="off"></div>
+              <div class="cell"><label class="lbl" for="f-zone">Zone</label>
+                <select id="f-zone" class="inp"><option value="">All</option><option>Zone I</option><option>Zone II</option><option>Zone III</option></select></div>
+              <div class="cell"><label class="lbl" for="f-center">Center Status</label>
+                <select id="f-center" class="inp"><option value="">All</option><option>Center</option><option>Sub-Center</option></select></div>
+              <div class="cell"><label class="lbl" for="f-owner">Ownership Type</label>
+                <select id="f-owner" class="inp"><option value="">All</option><option>Owned</option><option>Leased</option></select></div>
+            </div>
+            <div class="adv-foot"><button class="clear-btn" id="clear-adv">Clear filters</button></div>
+          </div>
+          <div class="sug-scroll" id="matches" hidden></div>
+        </section>
+
+        <section class="box">
+          <div class="list-head">
+            <h1>Land Records</h1>
+            <span class="muted" id="result-label"></span>
+          </div>
+          <div class="h-scroll">
+            <div class="rec-table" role="table" aria-label="Land records, latest transaction first">
+              <div class="rec-row rec-head" role="row">
+                <div role="columnheader">ID</div>
+                <div role="columnheader">Satsang Place</div>
+                <div role="columnheader">ISC Ref. No.</div>
+                <div role="columnheader">Zone</div>
+                <div role="columnheader">Transaction Date</div>
+                <div role="columnheader">Approval Status</div>
+              </div>
+              <div id="rec-rows"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- RECORD -->
+    <main class="view" id="record-view" hidden>
+      <div class="record-bar">
+        <div class="record-id">
+          <span>ID:</span><b>1</b>
+          <span style="margin-left:8px">NO:</span><b>10011</b>
+          <span class="pill lg" id="status-pill">Draft</span>
+        </div>
+        <div class="pager">
+          <button class="icon-btn" aria-label="First record"><svg class="ic" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3v10M13 8H6M9 4.5 5.5 8 9 11.5"/></svg></button>
+          <button class="icon-btn" aria-label="Previous record"><svg class="ic" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M14 8H3M6.5 4.5 3 8l3.5 3.5"/></svg></button>
+          <span>1/1</span>
+          <button class="icon-btn" aria-label="Next record"><svg class="ic" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9.5 4.5 13 8l-3.5 3.5"/></svg></button>
+          <button class="icon-btn" aria-label="Last record"><svg class="ic" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M13 3v10M3 8h7M7 4.5 10.5 8 7 11.5"/></svg></button>
+        </div>
+        <div class="record-actions">
+          <button class="approve-btn" id="approve-btn" hidden>
+            <svg class="ic" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg>
+            <span>Approve</span>
+          </button>
+          <div class="save-wrap">
+            <button class="save-btn">Save</button>
+            <button class="save-more" aria-label="More save options"><svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M0 0h10L5 6z" fill="#37474F"/></svg></button>
+          </div>
+          <a class="back-link" href="#/" aria-label="Back to land records"><svg class="ic" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8H3M6.5 4.5 3 8l3.5 3.5"/></svg></a>
+        </div>
+      </div>
+
+      <div class="record-body">
+        <section class="strip" aria-label="Land identification">
+          <div class="sec f-location"><div class="sec-h">Land Location</div><div class="grid g5" id="s-location"></div></div>
+          <div class="sec f-center"><div class="sec-h">Center</div><div class="grid g1" id="s-center"></div></div>
+          <div class="sec f-size"><div class="sec-h">Land Size Details</div><div class="grid g2" id="s-size"></div></div>
+          <div class="sec f-map">
+            <div class="sec-h">Location</div>
+            <button class="map-thumb" id="map-thumb" aria-label="Open land location in Google Maps">
+              <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <rect width="320" height="180" fill="#EEF2EA"/>
+                <rect x="14" y="12" width="84" height="58" fill="#DCE8CF"/>
+                <rect x="112" y="12" width="66" height="44" fill="#E4EDD9"/>
+                <rect x="222" y="100" width="86" height="66" fill="#DCE8CF"/>
+                <rect x="20" y="112" width="74" height="56" fill="#E4EDD9"/>
+                <path d="M-10 92C60 72 110 104 170 88S280 56 330 72" fill="none" stroke="#BFE3F0" stroke-width="7"/>
+                <path d="M-10 142 330 34" fill="none" stroke="#CFD8DC" stroke-width="9"/>
+                <path d="M-10 142 330 34" fill="none" stroke="#FFFFFF" stroke-width="6"/>
+                <path d="M196-10 150 190" fill="none" stroke="#CFD8DC" stroke-width="6"/>
+                <path d="M196-10 150 190" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+                <path d="M172 96 300 190" fill="none" stroke="#FFFFFF" stroke-width="3"/>
+                <path d="M160 92c-11-15-17-23-17-32a17 17 0 0 1 34 0c0 9-6 17-17 32z" fill="#D32F2F" stroke="#FFFFFF" stroke-width="2"/>
+                <circle cx="160" cy="60" r="6" fill="#FFFFFF"/>
+              </svg>
+              <span class="map-chip">View map</span>
+            </button>
+          </div>
+        </section>
+
+        <div class="row-wrap">
+          <section class="box f-half"><div class="sec-h">Documents Specifics</div><div class="grid g3" id="s-docspec"></div></section>
+          <section class="box f-half"><div class="sec-h">Land Details</div><div class="grid g3" id="s-land"></div></section>
+          <section class="box f-full"><div class="sec-h">Purchase Details</div><div class="grid g6" id="s-purchase"></div></section>
+        </div>
+
+        <div class="row-wrap">
+          <section class="box f-tree">
+            <div class="panel-head">
+              <h2>Revenue Documents</h2>
+              <span class="spacer"></span>
+              <button class="round opt" aria-label="Folder options"><svg width="4" height="16" viewBox="0 0 4 16" aria-hidden="true"><circle cx="2" cy="2" r="1.6" fill="#37474F"/><circle cx="2" cy="8" r="1.6" fill="#37474F"/><circle cx="2" cy="14" r="1.6" fill="#37474F"/></svg></button>
+            </div>
+            <div class="tree-wrap" id="tree"></div>
+          </section>
+
+          <section class="box f-docs">
+            <div class="panel-head">
+              <h2 class="b">Revenue Purchase Docs</h2>
+              <span class="muted" id="doc-path"></span>
+              <span class="spacer"></span>
+              <span class="muted" id="doc-selected"></span>
+              <button class="round del" id="doc-delete" aria-label="Delete selected rows" title="Delete selected rows" disabled><svg class="ic" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9.5h6.6L12 4M6.8 6.8v4M9.2 6.8v4"/></svg></button>
+              <button class="round add" id="doc-add" aria-label="Add row" title="Add row"><svg class="ic" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12"/></svg></button>
+            </div>
+            <div class="h-scroll">
+              <div class="doc-table" role="table" aria-label="Revenue purchase documents">
+                <div class="doc-row doc-head" role="row">
+                  <div role="columnheader">
+                    <input type="checkbox" class="cb" id="doc-all" aria-label="Select all documents">
+                    <button class="filter-btn" aria-label="Filter documents"><svg class="ic" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3h12L9.5 8.5V13l-3-1.5v-3z"/></svg></button>
+                  </div>
+                  <div role="columnheader">Doc Title <svg class="ic" width="12" height="12" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg><span class="req" aria-hidden="true">*</span></div>
+                  <div role="columnheader">Doc Type <svg class="ic" width="12" height="12" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg><span class="req" aria-hidden="true">*</span></div>
+                  <div role="columnheader">Doc Detail <span class="req" aria-hidden="true">*</span></div>
+                  <div role="columnheader" class="n">Sheet</div>
+                  <div role="columnheader" class="n">Page</div>
+                  <div role="columnheader">Document</div>
+                </div>
+                <div id="doc-rows"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="box f-remarks">
+            <div class="panel-head"><h2>Remarks</h2></div>
+            <textarea class="remarks" id="remarks" aria-label="Remarks">testing the update</textarea>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Scanned document drawer -->
+<div class="drawer-wrap" id="doc-drawer">
+  <button class="drawer-bg" data-close-doc aria-label="Close document"></button>
+  <aside class="drawer" role="dialog" aria-modal="true" aria-label="Scanned document">
+    <div class="drawer-head">
+      <div class="drawer-title"><b id="drawer-name"></b><span id="drawer-meta"></span></div>
+      <button class="icon-btn" id="drawer-close" data-close-doc aria-label="Close document" style="color:#37474F"><svg class="ic" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3 3 13"/></svg></button>
+    </div>
+    <div class="drawer-body"><img id="drawer-img" alt="Sample scan of a Jamabandi land record"></div>
+  </aside>
+</div>
+
+<!-- Sample scan: a specimen drawn for this prototype, not a real record -->
+<script type="image/svg+xml" id="scan-svg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 1100" width="850" height="1100">
+<defs>
+<filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" seed="4"/><feColorMatrix type="matrix" values="0 0 0 0 0.35  0 0 0 0 0.28  0 0 0 0 0.16  0 0 0 0.16 0"/></filter>
+<filter id="blotch" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.009" numOctaves="4" seed="11"/><feColorMatrix type="matrix" values="0 0 0 0 0.55  0 0 0 0 0.42  0 0 0 0 0.2  0 0 0 0.55 -0.14"/></filter>
+<filter id="ink" x="-2%" y="-2%" width="104%" height="104%"><feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="1.8"/></filter>
+<linearGradient id="edge" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#6B5B3A" stop-opacity="0.2"/><stop offset="0.05" stop-color="#6B5B3A" stop-opacity="0"/><stop offset="0.95" stop-color="#6B5B3A" stop-opacity="0"/><stop offset="1" stop-color="#6B5B3A" stop-opacity="0.24"/></linearGradient>
+<linearGradient id="fold" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#000000" stop-opacity="0"/><stop offset="0.5" stop-color="#5A4A2A" stop-opacity="0.22"/><stop offset="0.52" stop-color="#FFFFFF" stop-opacity="0.35"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></linearGradient>
+</defs>
+<rect width="850" height="1100" fill="#3A3D40"/>
+<g transform="rotate(-0.5 425 550)">
+<rect x="24" y="20" width="802" height="1062" fill="#000000" opacity="0.35"/>
+<rect x="20" y="16" width="802" height="1062" fill="#EFE6CF"/>
+<rect x="20" y="16" width="802" height="1062" filter="url(#blotch)"/>
+<rect x="20" y="16" width="802" height="1062" filter="url(#grain)"/>
+<rect x="20" y="16" width="802" height="1062" fill="url(#edge)"/>
+<rect x="20" y="538" width="802" height="20" fill="url(#fold)"/>
+<circle cx="52" cy="330" r="12" fill="#3A3D40"/><circle cx="52" cy="770" r="12" fill="#3A3D40"/>
+<g filter="url(#ink)" fill="#2A2620" font-family="Georgia, 'Times New Roman', serif">
+<text x="425" y="86" text-anchor="middle" font-size="30" font-weight="700" letter-spacing="2">JAMABANDI</text>
+<text x="425" y="116" text-anchor="middle" font-size="18">Record of Rights in Land</text>
+<path d="M90 134H760M90 139H760" stroke="#2A2620" stroke-width="1.4" fill="none"/>
+<g font-size="17">
+<text x="90" y="178">District</text><text x="330" y="178">Tehsil</text><text x="560" y="178">Village</text>
+<text x="90" y="222">Pin Code</text><text x="330" y="222">Sheet</text><text x="560" y="222">Page</text>
+</g>
+<path d="M155 182H310M385 182H540M622 182H760M170 226H310M385 226H540M612 226H760" stroke="#2A2620" stroke-width="1" stroke-dasharray="2 3" fill="none"/>
+<g fill="none" stroke="#2A2620" stroke-width="1.5">
+<rect x="90" y="256" width="670" height="500"/>
+<path d="M90 316H760M185 256V756M285 256V756M470 256V756M590 256V756"/>
+<path d="M90 416H760M90 516H760M90 616H760" stroke-width="0.8"/>
+</g>
+<g font-size="15" text-anchor="middle" font-weight="700">
+<text x="137" y="282">Khewat</text><text x="137" y="302">No.</text>
+<text x="235" y="282">Khasra</text><text x="235" y="302">No.</text>
+<text x="377" y="292">Owner</text>
+<text x="530" y="282">Area</text><text x="530" y="302">(Sq. Yards)</text>
+<text x="675" y="292">Remarks</text>
+</g>
+</g>
+<g filter="url(#ink)" fill="#1F2F6B" font-family="'Bradley Hand', 'Segoe Script', 'Comic Sans MS', cursive" font-size="23">
+<text x="160" y="176" transform="rotate(-1 160 176)">Amritsar</text>
+<text x="390" y="176" transform="rotate(-0.6 390 176)">Bal Sarai</text>
+<text x="626" y="176" transform="rotate(-1 626 176)">Bal sari</text>
+<text x="176" y="220">143204</text><text x="392" y="220">5</text><text x="618" y="220">9</text>
+<text x="104" y="366" transform="rotate(-1 104 366)">12121</text>
+<text x="214" y="366">231</text>
+<text x="294" y="356" font-size="20" transform="rotate(-0.8 294 356)">Radha Soami</text>
+<text x="294" y="386" font-size="20" transform="rotate(-0.8 294 386)">Satsang Beas</text>
+<text x="498" y="366">3025</text>
+<text x="598" y="352" font-size="18">Sale deed</text>
+<text x="598" y="376" font-size="18">No. 234324</text>
+<text x="598" y="400" font-size="18">01 Jan 2026</text>
+<path d="M120 470L720 700" stroke="#1F2F6B" stroke-width="1.2" fill="none" opacity="0.65"/>
+<text x="470" y="822" font-size="19">Checked and entered</text>
+<path d="M500 900c18-34 30-40 34-22s-20 38-10 34 26-44 38-36-10 34 2 30 24-24 36-20 4 18 18 12 26-14 54-12" fill="none" stroke="#1F2F6B" stroke-width="2.2" stroke-linecap="round"/>
+</g>
+<g filter="url(#ink)" fill="#2A2620" font-family="Georgia, 'Times New Roman', serif" font-size="16">
+<text x="90" y="934">Date</text><path d="M130 938H300" stroke="#2A2620" stroke-width="1" stroke-dasharray="2 3" fill="none"/>
+<text x="505" y="934">Signature of Revenue Officer</text>
+</g>
+<g filter="url(#ink)" transform="rotate(-11 200 840)" opacity="0.72">
+<circle cx="200" cy="840" r="66" fill="none" stroke="#5B2C83" stroke-width="4"/>
+<circle cx="200" cy="840" r="52" fill="none" stroke="#5B2C83" stroke-width="1.6"/>
+<text x="200" y="836" text-anchor="middle" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#5B2C83">SAMPLE</text>
+<text x="200" y="858" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#5B2C83">NOT OFFICIAL</text>
+</g>
+<text x="425" y="1040" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#A32020" letter-spacing="1">SPECIMEN FOR PROTOTYPE ONLY. NOT A LEGAL DOCUMENT.</text>
+<text x="425" y="640" text-anchor="middle" font-family="Arial, sans-serif" font-size="120" font-weight="700" fill="#A32020" opacity="0.13" transform="rotate(-38 425 640)">SAMPLE</text>
+</g>
+</svg></script>
+
+<!-- Approval confirmation -->
+<div class="modal" id="confirm-modal" hidden>
+  <button class="backdrop" data-close="confirm" aria-label="Cancel approval"></button>
+  <div class="dialog confirm-dialog" role="dialog" aria-modal="true" aria-label="Approve this record">
+    <div class="sec-h" style="font-size:14px;padding:8px 12px">Approve this record?</div>
+    <p class="confirm-text">Revenue In Form NO 10011 will move from Draft to Approved.</p>
+    <div class="confirm-foot">
+      <button class="cancel-btn" id="confirm-cancel" data-close="confirm">Cancel</button>
+      <button class="approve-btn" id="confirm-ok">Approve</button>
+    </div>
+  </div>
+</div>
+
+<!-- Google Maps -->
+<div class="modal" id="map-modal" hidden>
+  <button class="backdrop" data-close="map" aria-label="Close map"></button>
+  <div class="dialog map-dialog" role="dialog" aria-modal="true" aria-label="Land location on Google Maps">
+    <div class="map-head">
+      <span id="map-address"></span>
+      <a id="map-link" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
+      <button class="icon-btn" id="map-close" data-close="map" aria-label="Close" style="color:#37474F"><svg class="ic" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3 3 13"/></svg></button>
+    </div>
+    <iframe class="map-frame" id="map-frame" title="Google Map of the land location" referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (v) {
+    return String(v).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  };
+
+  /* ---------- Land records ---------- */
+  // Only record 1 is real; the other rows are sample data for the prototype.
+  var records = [
+    { id: 1, place: 'Amritsar-I (Mall Road)', city: 'Bal Sarai', isc: '10011', zone: 'Zone I', center: 'Sub-Center', owner: 'Owned', person: 'Person A', status: 'Draft', date: '2026-01-01' },
+    { id: 2, place: 'Sample Place 2', city: 'Amritsar', isc: '10012', zone: 'Zone II', center: 'Center', owner: 'Owned', person: 'Person B', status: 'Approved', date: '2025-03-18' },
+    { id: 3, place: 'Sample Place 3', city: 'Sample City A', isc: '10013', zone: 'Zone I', center: 'Sub-Center', owner: 'Leased', person: 'Person C', status: 'Approved', date: '2025-09-02' },
+    { id: 4, place: 'Sample Place 4', city: 'Sample City B', isc: '10014', zone: 'Zone III', center: 'Sub-Center', owner: 'Owned', person: 'Person A', status: 'Approved', date: '2024-11-21' },
+    { id: 5, place: 'Sample Place 5', city: 'Amritsar', isc: '10015', zone: 'Zone II', center: 'Center', owner: 'Leased', person: 'Person D', status: 'Draft', date: '2025-12-09' },
+    { id: 6, place: 'Sample Place 6', city: 'Sample City A', isc: '10016', zone: 'Zone III', center: 'Center', owner: 'Owned', person: 'Person B', status: 'Approved', date: '2024-06-30' },
+    { id: 7, place: 'Sample Place 7', city: 'Sample City C', isc: '10017', zone: 'Zone I', center: 'Sub-Center', owner: 'Owned', person: 'Person C', status: 'Draft', date: '2025-07-14' },
+    { id: 8, place: 'Sample Place 8', city: 'Sample City B', isc: '10018', zone: 'Zone II', center: 'Sub-Center', owner: 'Leased', person: 'Person D', status: 'Approved', date: '2025-02-05' }
+  ];
+  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var cityPick = '';
+  var singleMatch = false;
+
+  function dateLabel(iso) {
+    var p = iso.split('-');
+    return p[2] + ' ' + MONTHS[Number(p[1]) - 1] + ' ' + p[0];
+  }
+
+  function renderList() {
+    var q = $('q').value.trim().toLowerCase();
+    var person = $('f-person').value.trim().toLowerCase();
+    var zone = $('f-zone').value, center = $('f-center').value, owner = $('f-owner').value;
+
+    var matchesQuery = function (r) {
+      return r.place.toLowerCase().indexOf(q) > -1 || r.city.toLowerCase().indexOf(q) > -1 || String(r.id) === q;
+    };
+    var rows = records.filter(function (r) {
+      if (cityPick ? r.city !== cityPick : (q && !matchesQuery(r))) return false;
+      if (person && r.person.toLowerCase().indexOf(person) === -1) return false;
+      if (zone && r.zone !== zone) return false;
+      if (center && r.center !== center) return false;
+      if (owner && r.owner !== owner) return false;
+      return true;
+    }).sort(function (a, b) { return b.date.localeCompare(a.date); });
+
+    $('rec-rows').innerHTML = rows.length ? rows.map(function (r) {
+      return '<div class="rec-row rec-body" role="row">' +
+        '<div role="cell" class="rec-id">' + r.id + '</div>' +
+        '<div role="cell"><a class="rec-link" href="#/record">' + esc(r.place) + '</a></div>' +
+        '<div role="cell">' + esc(r.isc) + '</div>' +
+        '<div role="cell">' + esc(r.zone) + '</div>' +
+        '<div role="cell">' + dateLabel(r.date) + '</div>' +
+        '<div role="cell"><span class="pill' + (r.status === 'Approved' ? ' approved' : '') + '">' + r.status + '</span></div>' +
+        '</div>';
+    }).join('') : '<div class="empty">No land records match this search.</div>';
+
+    var searching = !!(q || person || zone || center || owner);
+    singleMatch = searching && rows.length === 1;
+    var label = rows.length + ' records, latest transaction first';
+    if (rows.length === 1) label = singleMatch ? '1 record found. Press Search or Enter to open it.' : '1 record';
+    else if (cityPick) label = rows.length + ' records in ' + cityPick + ', latest transaction first';
+    $('result-label').textContent = label;
+
+    // Drop-down: each column lists its own matches, independently of the other.
+    var isHit = function (v) { return v.toLowerCase().indexOf(q) > -1 && !/^sample/i.test(v); };
+    var typing = q && !cityPick;
+    var placeHits = typing ? records.map(function (r) { return r.place; }).filter(isHit) : [];
+    var cityHits = [];
+    if (typing) {
+      records.forEach(function (r) { if (isHit(r.city) && cityHits.indexOf(r.city) === -1) cityHits.push(r.city); });
+    }
+    var n = Math.max(placeHits.length, cityHits.length);
+    var body = '';
+    for (var i = 0; i < n; i++) {
+      body += '<div class="sug-row sug-body" role="row"><div role="cell">' +
+        (placeHits[i] ? '<a class="sug-link" href="#/record">' + esc(placeHits[i]) + '</a>' : '') +
+        '</div><div role="cell">' +
+        (cityHits[i] ? '<button class="sug-link" data-city="' + esc(cityHits[i]) + '">' + esc(cityHits[i]) + '</button>' : '') +
+        '</div></div>';
+    }
+    $('matches').hidden = n === 0;
+    $('matches').innerHTML = n === 0 ? '' :
+      '<div role="table" aria-label="Search matches"><div class="sug-row sug-head" role="row">' +
+      '<div role="columnheader">Satsang Place</div><div role="columnheader">City</div></div>' + body + '</div>';
+
+    var advCount = [person, zone, center, owner].filter(Boolean).length;
+    $('adv-label').textContent = advCount ? 'Advanced search (' + advCount + ')' : 'Advanced search';
+  }
+
+  function openIfSingle() {
+    if (singleMatch) location.hash = '#/record';
+  }
+
+  $('q').addEventListener('input', function () { cityPick = ''; renderList(); });
+  $('q').addEventListener('keydown', function (e) { if (e.key === 'Enter') openIfSingle(); });
+  $('search-btn').addEventListener('click', openIfSingle);
+  ['f-person', 'f-zone', 'f-center', 'f-owner'].forEach(function (id) {
+    $(id).addEventListener('input', renderList);
+  });
+  $('adv-btn').addEventListener('click', function () {
+    var open = $('adv-panel').hidden;
+    $('adv-panel').hidden = !open;
+    $('adv-btn').setAttribute('aria-expanded', String(open));
+    $('adv-chev').classList.toggle('open', open);
+  });
+  $('clear-adv').addEventListener('click', function () {
+    ['f-person', 'f-zone', 'f-center', 'f-owner'].forEach(function (id) { $(id).value = ''; });
+    renderList();
+  });
+  $('matches').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-city]');
+    if (!btn) return;
+    cityPick = btn.getAttribute('data-city');
+    $('q').value = cityPick;
+    renderList();
+  });
+
+  /* ---------- Record: fields ---------- */
+  var ICON_LOOKUP = '<svg class="ic" width="12" height="12" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>';
+  var ICON_DATE = '<svg class="ic" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="3.5" width="11" height="10" rx="1"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3"/></svg>';
+
+  function formatInr(raw) {
+    if (!raw) return '';
+    var parts = String(raw).split('.');
+    var whole = Number(parts[0] || 0).toLocaleString('en-IN');
+    return '₹ ' + whole + (parts.length > 1 ? '.' + parts.slice(1).join('') : '');
+  }
+
+  var sections = {
+    's-location': [
+      { id: 'place', label: 'Satsang Place', value: 'Amritsar-I (Mall Road)', l: 1, r: 1, c: 's3 strong bold' },
+      { id: 'village', label: 'Village', value: 'Bal sari' },
+      { id: 'tehsil', label: 'Tehsil', value: 'Bal Sarai' },
+      { id: 'city', label: 'City', value: 'Bal Sarai', l: 1 },
+      { id: 'district', label: 'District', value: 'Amritsar', l: 1, r: 1 },
+      { id: 'state', label: 'State', value: 'Punjab', l: 1, r: 1 },
+      { id: 'pin', label: 'Pin Code', value: '143204' },
+      { id: 'country', label: 'Country', value: 'India', l: 1 }
+    ],
+    's-center': [
+      { id: 'centerStatus', label: 'Center Status', value: 'Sub-Center', l: 1 },
+      { id: 'zone', label: 'Zone', value: 'Zone I', l: 1 }
+    ],
+    's-size': [
+      { id: 'units', label: 'Local Units', value: '100', r: 1, c: 's2' },
+      { id: 'yards', label: 'Sqr. Yards', value: '3025', n: 1 },
+      { id: 'acres', label: 'Size in Acres', value: '0.62', n: 1, c: 'strong' }
+    ],
+    's-docspec': [
+      { id: 'isc', label: 'ISC Ref No.', value: '10011', r: 1 },
+      { id: 'deed', label: 'Deed Registration No.', value: '234324', r: 1 },
+      { id: 'deedDt', label: 'Deed Reg. Dt.', value: '01 Jan 2026', r: 1, d: 1 },
+      { id: 'res', label: 'Resolution No.', value: '909', r: 1 },
+      { id: 'resDt', label: 'Resolution Dt.', value: '05 Oct 2026', r: 1, d: 1 },
+      { id: 'khewat', label: 'Khewat No.', value: '12121' },
+      { id: 'khasra', label: 'Khasra No.', value: '231' },
+      { id: 'jama', label: 'Jamabandi Year', value: 'Jamabandi11', c: 's2' }
+    ],
+    's-land': [
+      { id: 'acq', label: 'Acquisition Type', value: 'Purchase', l: 1, r: 1 },
+      { id: 'nature', label: 'Land Type', value: 'On Payment', l: 1, r: 1 },
+      { id: 'zoning', label: 'Zoning Type', value: 'Non-Agricultural', l: 1 },
+      { id: 'owner', label: 'Ownership Type', value: 'Owned', l: 1, r: 1 },
+      { id: 'lease', label: 'Lease Termination Dt.', value: '31 Dec 9999', d: 1 },
+      { id: 'party', label: 'Acquired Party', value: 'Anonymous' },
+      { id: 'surplus', label: 'Is Surplus Land', check: 1, value: true, c: 's3' }
+    ],
+    's-purchase': [
+      { id: 'society', label: 'Purchaser Society', value: 'Radha Soami Satsang Beas', l: 1, r: 1, c: 's2' },
+      { id: 'acqAmt', label: 'Acquired Amount', value: '25005000', n: 1, money: 1 },
+      { id: 'consAmt', label: 'Consideration Amount', value: '2550000', n: 1, money: 1 },
+      { id: 'stamp', label: 'Stamp Duty Amount', value: '2400', n: 1, money: 1 },
+      { id: 'other', label: 'Other Charges Amount', value: '3000', n: 1, money: 1 }
+    ]
+  };
+
+  Object.keys(sections).forEach(function (sectionId) {
+    $(sectionId).innerHTML = sections[sectionId].map(function (f) {
+      var cls = 'cell' + (f.c ? ' ' + f.c : '');
+      if (f.check) {
+        return '<div class="' + cls + '"><label class="check"><input type="checkbox" id="fld-' + f.id + '"' +
+          (f.value ? ' checked' : '') + '><span>' + esc(f.label) + '</span></label></div>';
+      }
+      var val = f.money ? formatInr(f.value) : f.value;
+      return '<div class="' + cls + '"><label class="lbl" for="fld-' + f.id + '"><span>' + esc(f.label) + '</span>' +
+        (f.l ? ICON_LOOKUP : '') + (f.r ? '<span class="req" aria-hidden="true">*</span>' : '') +
+        '</label><div class="val-row"><input id="fld-' + f.id + '" class="inp' + (f.n ? ' num' : '') +
+        '"' + (f.money ? ' data-money' : '') + ' autocomplete="off" value="' + esc(val) + '">' +
+        (f.d ? ICON_DATE : '') + '</div></div>';
+    }).join('');
+  });
+
+  $('record-view').addEventListener('input', function (e) {
+    if (e.target.hasAttribute('data-money')) {
+      e.target.value = formatInr(e.target.value.replace(/[^0-9.]/g, ''));
+    }
+  });
+
+  /* ---------- Record: approval ---------- */
+  // Preview the creator's view by adding ?role=creator to the URL.
+  var role = new URLSearchParams(location.search).get('role') === 'creator' ? 'creator' : 'approver';
+  var recordStatus = 'Draft';
+
+  function renderStatus() {
+    $('status-pill').textContent = recordStatus;
+    $('status-pill').classList.toggle('approved', recordStatus === 'Approved');
+    $('approve-btn').hidden = !(role === 'approver' && recordStatus === 'Draft');
+  }
+
+  var lastFocus = null;
+  function openModal(id, focusId) {
+    lastFocus = document.activeElement;
+    $(id).hidden = false;
+    $(focusId).focus();
+  }
+  function closeModal(id) {
+    $(id).hidden = true;
+    if (lastFocus && lastFocus.focus && !lastFocus.hidden) lastFocus.focus();
+  }
+  function closeMap() {
+    closeModal('map-modal');
+    $('map-frame').removeAttribute('src');
+  }
+
+  $('approve-btn').addEventListener('click', function () { openModal('confirm-modal', 'confirm-cancel'); });
+  $('confirm-ok').addEventListener('click', function () {
+    recordStatus = 'Approved';
+    records[0].status = 'Approved';
+    closeModal('confirm-modal');
+    renderStatus();
+    renderList();
+    $('status-pill').setAttribute('tabindex', '-1');
+    $('status-pill').focus({ preventScroll: true });
+  });
+
+  /* ---------- Record: map ---------- */
+  $('map-thumb').addEventListener('click', function () {
+    var address = [$('fld-city').value, $('fld-district').value, $('fld-state').value + ' ' + $('fld-pin').value].join(', ');
+    var encoded = encodeURIComponent(address);
+    $('map-address').textContent = address;
+    $('map-link').href = 'https://www.google.com/maps/search/?api=1&query=' + encoded;
+    $('map-frame').src = 'https://www.google.com/maps?q=' + encoded + '&output=embed';
+    openModal('map-modal', 'map-close');
+  });
+
+  document.addEventListener('click', function (e) {
+    var closer = e.target.closest('[data-close]');
+    if (!closer) return;
+    if (closer.getAttribute('data-close') === 'map') closeMap(); else closeModal('confirm-modal');
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (!$('map-modal').hidden) closeMap();
+    if (!$('confirm-modal').hidden) closeModal('confirm-modal');
+    closeDrawer();
+  });
+
+  /* ---------- Record: documents ---------- */
+  var FOLDERS = ['Forms', 'Content', 'Additional', 'Sale'];
+  var FOLDER_ICON = '<svg class="ic" width="20" height="18" viewBox="0 0 20 18" aria-hidden="true"><path d="M2 15V3h5l2 2h7v3M2 15l3-7h13l-3 7z"/></svg>';
+  var SCAN_URL = 'data:image/svg+xml,' + encodeURIComponent($('scan-svg').textContent);
+  $('drawer-img').src = SCAN_URL;
+  var THUMB = function (title) {
+    var label = 'Open scanned document: ' + (title || 'Untitled');
+    return '<button class="thumb-btn" data-view aria-label="' + esc(label) + '" title="' + esc(label) + '">' +
+      '<img class="thumb" src="' + SCAN_URL + '" alt=""></button>';
+  };
+  var drawerFocus = null;
+  function openDrawer(d, opener) {
+    drawerFocus = opener;
+    $('drawer-name').textContent = d.title || 'Untitled document';
+    $('drawer-meta').textContent = [d.type, d.detail, d.sheet && 'Sheet ' + d.sheet, d.page && 'Page ' + d.page].filter(Boolean).join(' · ');
+    $('doc-drawer').classList.add('open');
+    $('drawer-close').focus();
+  }
+  function closeDrawer() {
+    if (!$('doc-drawer').classList.contains('open')) return;
+    $('doc-drawer').classList.remove('open');
+    if (drawerFocus && document.contains(drawerFocus)) drawerFocus.focus();
+  }
+  $('doc-drawer').addEventListener('click', function (e) {
+    if (e.target.closest('[data-close-doc]')) closeDrawer();
+  });
+  var folder = 'Additional';
+  var rootOpen = true;
+  var nextDocId = 2;
+  var docs = [
+    { id: 1, folder: 'Additional', title: 'Jamabandi', type: 'Sale Sheet', detail: 'sale deed', sheet: '5', page: '9', hasFile: true, selected: false }
+  ];
+
+  var inFolder = function (d) { return folder === '' || d.folder === folder; };
+
+  function renderTree() {
+    var html = '<div class="tree-root">' +
+      '<button class="tree-toggle" data-toggle aria-expanded="' + rootOpen + '" aria-label="' + (rootOpen ? 'Collapse folders' : 'Expand folders') + '">' +
+      '<svg class="ic" width="12" height="12" viewBox="0 0 16 16" aria-hidden="true"><path d="' + (rootOpen ? 'M3 8h10' : 'M3 8h10M8 3v10') + '"/></svg></button>' +
+      '<button class="tree-btn' + (folder === '' ? ' on' : '') + '" data-folder="">' + FOLDER_ICON + '<span>/</span></button></div>';
+    if (rootOpen) {
+      html += '<ul class="tree">' + FOLDERS.map(function (name) {
+        return '<li><button class="tree-btn' + (name === folder ? ' on' : '') + '" data-folder="' + name + '"' +
+          (name === folder ? ' aria-current="true"' : '') + '>' + FOLDER_ICON + '<span>' + name + '</span></button></li>';
+      }).join('') + '</ul>';
+    }
+    $('tree').innerHTML = html;
+  }
+
+  function renderDocBar() {
+    var shown = docs.filter(inFolder);
+    var count = shown.filter(function (d) { return d.selected; }).length;
+    $('doc-selected').textContent = count ? count + ' selected' : '';
+    $('doc-delete').disabled = count === 0;
+    $('doc-all').checked = shown.length > 0 && count === shown.length;
+  }
+
+  function renderDocs() {
+    var shown = docs.filter(inFolder);
+    var path = '/' + folder;
+    $('doc-path').textContent = path;
+    $('doc-rows').innerHTML = shown.length ? shown.map(function (d, i) {
+      return '<div class="doc-row" role="row" data-doc="' + d.id + '">' +
+        '<div role="cell"><input type="checkbox" class="cb" data-select aria-label="Select row ' + (i + 1) + '"' + (d.selected ? ' checked' : '') + '><span class="doc-no">' + (i + 1) + '</span></div>' +
+        '<div role="cell"><input class="inp" data-key="title" aria-label="Doc title" value="' + esc(d.title) + '"></div>' +
+        '<div role="cell"><input class="inp" data-key="type" aria-label="Doc type" value="' + esc(d.type) + '"></div>' +
+        '<div role="cell"><input class="inp" data-key="detail" aria-label="Doc detail" value="' + esc(d.detail) + '"></div>' +
+        '<div role="cell"><input class="inp num" data-key="sheet" aria-label="Sheet" value="' + esc(d.sheet) + '"></div>' +
+        '<div role="cell"><input class="inp num" data-key="page" aria-label="Page" value="' + esc(d.page) + '"></div>' +
+        '<div role="cell">' + (d.hasFile ? THUMB(d.title) :
+          '<button class="add-tile" data-upload aria-label="Upload document"><svg class="ic" width="22" height="22" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12"/></svg></button>') +
+        '</div></div>';
+    }).join('') : '<div class="doc-empty">No documents in ' + esc(path) + '</div>';
+    renderDocBar();
+  }
+
+  var docById = function (el) {
+    var row = el.closest('[data-doc]');
+    var id = row && Number(row.getAttribute('data-doc'));
+    return docs.filter(function (d) { return d.id === id; })[0];
+  };
+
+  $('tree').addEventListener('click', function (e) {
+    if (e.target.closest('[data-toggle]')) {
+      rootOpen = !rootOpen;
+      renderTree();
+      return;
+    }
+    var btn = e.target.closest('[data-folder]');
+    if (!btn) return;
+    folder = btn.getAttribute('data-folder');
+    renderTree();
+    renderDocs();
+  });
+  $('doc-rows').addEventListener('input', function (e) {
+    var key = e.target.getAttribute('data-key');
+    var d = docById(e.target);
+    if (key && d) d[key] = e.target.value;
+  });
+  $('doc-rows').addEventListener('change', function (e) {
+    if (!e.target.hasAttribute('data-select')) return;
+    docById(e.target).selected = e.target.checked;
+    renderDocBar();
+  });
+  $('doc-rows').addEventListener('click', function (e) {
+    var view = e.target.closest('[data-view]');
+    if (view) {
+      openDrawer(docById(view), view);
+      return;
+    }
+    var btn = e.target.closest('[data-upload]');
+    if (!btn) return;
+    docById(btn).hasFile = true;
+    renderDocs();
+  });
+  $('doc-all').addEventListener('change', function (e) {
+    docs.forEach(function (d) { if (inFolder(d)) d.selected = e.target.checked; });
+    renderDocs();
+  });
+  $('doc-add').addEventListener('click', function () {
+    docs.push({ id: nextDocId++, folder: folder, title: '', type: '', detail: '', sheet: '', page: '', hasFile: false, selected: false });
+    renderDocs();
+  });
+  $('doc-delete').addEventListener('click', function () {
+    docs = docs.filter(function (d) { return !(inFolder(d) && d.selected); });
+    renderDocs();
+  });
+
+  /* ---------- Routing ---------- */
+  function route() {
+    var onRecord = location.hash.indexOf('#/record') === 0;
+    $('list-view').hidden = onRecord;
+    $('record-view').hidden = !onRecord;
+    $('top-title').textContent = onRecord ? 'Revenue In Forms [Browse]' : 'Revenue In Forms';
+    if (!$('map-modal').hidden) closeMap();
+    if (!$('confirm-modal').hidden) closeModal('confirm-modal');
+    closeDrawer();
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', route);
+
+  renderList();
+  renderStatus();
+  renderTree();
+  renderDocs();
+  route();
+})();
+</script>
+</body>
+</html>
